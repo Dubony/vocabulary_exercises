@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>פעילות אוצר מילים – בית בן־גוריון</title>
+<style>
+  :root { --ink:#203047; --muted:#64748b; --line:#dbe3ec; --paper:#ffffff; --bg:#f3f6fa; --accent:#285b8f; --good:#167447; --bad:#b42318; }
+  * { box-sizing:border-box; }
+  body { margin:0; background:var(--bg); color:var(--ink); font-family:Arial,"Noto Sans Hebrew",sans-serif; line-height:1.65; }
+  main { width:min(900px, calc(100% - 28px)); margin:28px auto 56px; }
+  header { background:#e8f0f8; border-radius:18px; padding:26px; margin-bottom:20px; }
+  h1 { margin:0 0 8px; font-size:clamp(1.6rem,4vw,2.2rem); }
+  h2 { font-size:1.3rem; margin:0 0 14px; }
+  .intro { color:#40536b; margin:0; }
+  section { background:var(--paper); border:1px solid var(--line); border-radius:16px; padding:22px; margin:18px 0; box-shadow:0 3px 12px #2030470a; }
+  .question { padding:13px 0; border-bottom:1px solid #edf1f5; }
+  .question:last-child { border-bottom:0; }
+  .question p { margin:0 0 8px; font-weight:700; }
+  label { display:block; margin:6px 0; cursor:pointer; }
+  input[type="radio"] { margin-left:7px; accent-color:var(--accent); }
+  input[type="text"] { width:min(100%,420px); padding:10px 12px; border:1px solid #bdc9d7; border-radius:9px; font:inherit; }
+  .wordbank { background:#f4f7fb; border:1px dashed #b9c8d9; border-radius:10px; padding:10px 14px; margin-bottom:12px; }
+  button { border:0; border-radius:10px; padding:11px 18px; font:700 1rem Arial,sans-serif; cursor:pointer; background:var(--accent); color:white; margin:8px 5px 0 0; }
+  button.secondary { background:#e8edf3; color:var(--ink); }
+  button:hover { filter:brightness(.96); }
+  .feedback { display:block; min-height:1.4em; font-weight:700; margin-top:5px; }
+  .correct { color:var(--good); } .incorrect { color:var(--bad); }
+  #score { background:#eef6f0; border:1px solid #cce5d4; border-radius:12px; padding:14px; margin-top:16px; font-weight:700; display:none; }
+  .small { color:var(--muted); font-size:.92rem; }
+  textarea { width:100%; min-height:70px; padding:10px; border:1px solid #bdc9d7; border-radius:9px; font:inherit; resize:vertical; }
+  @media print { body { background:white; } section { break-inside:avoid; box-shadow:none; } button { display:none; } }
+</style>
+</head>
+<body>
+<main>
+<header>
+  <h1>📚 פעילות אוצר מילים – בית בן־גוריון</h1>
+  <p class="intro">קראו את השאלות, בחרו או כתבו תשובות, ובסיום בדקו את עצמכם. בהצלחה!</p>
+</header>
+
+<section>
+  <h2>חלק א׳ – התאמת מילה לפירוש</h2>
+  <p class="small">בחרו את הפירוש המתאים לכל מילה.</p>
+  <div id="matching"></div>
+</section>
+
+<section>
+  <h2>חלק ב׳ – השלימו את המשפטים</h2>
+  <div class="wordbank"><strong>מחסן מילים:</strong> שיפוץ | הוריש | מצפים | פריטים | לשמר | אירחה</div>
+  <div id="fill"></div>
+</section>
+
+<section>
+  <h2>חלק ג׳ – נכון או לא נכון?</h2>
+  <div id="truefalse"></div>
+</section>
+
+<section>
+  <h2>חלק ד׳ – אתגר כתיבה</h2>
+  <p>ענו במילים שלכם:</p>
+  <div class="question">1. מה ההבדל בין שיפוץ לבין שימור?<textarea aria-label="תשובה לשאלה 1"></textarea></div>
+  <div class="question">2. מה פירוש הביטוי „העמיד לרשות הציבור”?<textarea aria-label="תשובה לשאלה 2"></textarea></div>
+  <div class="question">3. כתבו משפט משלכם עם המילה „מורשת”.<textarea aria-label="תשובה לשאלה 3"></textarea></div>
+  <div class="question">4. מה פירוש הביטוי „שבים למקומם”?<textarea aria-label="תשובה לשאלה 4"></textarea></div>
+  <p class="small">בחלק זה אפשר להשוות את התשובות עם המורה או עם חברים.</p>
+</section>
+
+<button onclick="checkAll()">בדיקת כל התשובות</button>
+<button class="secondary" onclick="resetActivity()">התחלה מחדש</button>
+<div id="score" role="status" aria-live="polite"></div>
+</main>
+
+<script>
+const matching = [
+ ["צוואה", ["שמירה על משהו כדי שלא ייהרס", "מסמך שבו אדם קובע מה ייעשה ברכושו לאחר מותו", "קבלת אורחים בבית"], 1],
+ ["הוריש", ["העביר רכוש לאחר מותו", "תיקן ושיפץ", "חיכה למישהו"], 0],
+ ["לשמר", ["לצבוע מחדש", "לשמור על משהו כדי שלא ייהרס או יישכח", "להחזיר למקום"], 1],
+ ["פריטים", ["אנשים חשובים", "מקומות היסטוריים", "חפצים ודברים שונים"], 2],
+ ["אירחה", ["קיבלה אנשים כאורחים", "הכריזה על אירוע", "שמרה על חפצים"], 0],
+ ["מצפים", ["מתקנים", "מחכים למשהו או למישהו", "משמרים"], 1],
+ ["מרגש", ["מעורר הרגשה חזקה", "ישן מאוד", "פרטי ולא ציבורי"], 0],
+ ["שימור", ["הריסת מבנה", "שמירה על מבנה או חפצים היסטוריים", "העברת חפצים"], 1]
+];
+const fill = [
+ ["בן־גוריון ______ את ביתו למדינת ישראל.", "הוריש"],
+ ["במהלך השנה וחצי האחרונות עבר הבית עבודות ______.", "שיפוץ"],
+ ["חשוב ______ את החפצים ההיסטוריים.", "לשמר"],
+ ["בבית נמצאים ספרים, מסמכים ורהיטים שהם ______ היסטוריים.", "פריטים"],
+ ["פולה בן־גוריון ______ מנהיגים מישראל ומהעולם.", "אירחה"],
+ ["אנחנו ______ לפתיחת הבית מחדש.", "מצפים"]
+];
+const tf = [
+ ["צוואה היא מסמך שבו אדם קובע מה ייעשה ברכושו לאחר מותו.", true],
+ ["לשמר פירושו להרוס משהו ישן.", false],
+ ["חפצים אישיים הם דברים ששייכים לאדם.", true],
+ ["המילה „מצפים” פירושה מחכים למשהו.", true],
+ ["„העמיד לרשות הציבור” פירושו שרק בעל הבית יכול להשתמש במקום.", false]
+];
+
+function render() {
+  document.getElementById('matching').innerHTML = matching.map((q,i) =>
+    `<div class="question" data-kind="match" data-index="${i}"><p>${i+1}. ${q[0]}</p>` +
+    q[1].map((o,j)=>`<label><input type="radio" name="m${i}" value="${j}">${String.fromCharCode(1488+j)}. ${o}</label>`).join('') +
+    `<span class="feedback"></span></div>`).join('');
+  document.getElementById('fill').innerHTML = fill.map((q,i) =>
+    `<div class="question" data-kind="fill" data-index="${i}"><p>${i+1}. ${q[0]}</p><input type="text" autocomplete="off" aria-label="תשובה למשפט ${i+1}"><span class="feedback"></span></div>`).join('');
+  document.getElementById('truefalse').innerHTML = tf.map((q,i) =>
+    `<div class="question" data-kind="tf" data-index="${i}"><p>${i+1}. ${q[0]}</p>`+
+    `<label><input type="radio" name="t${i}" value="true">נכון</label><label><input type="radio" name="t${i}" value="false">לא נכון</label><span class="feedback"></span></div>`).join('');
+}
+function checkAll() {
+  let total=0, correct=0, unanswered=0;
+  document.querySelectorAll('[data-kind]').forEach(el => {
+    total++;
+    const i=+el.dataset.index, kind=el.dataset.kind;
+    let ok=false, answered=false;
+    if(kind==='match') {
+      const v=el.querySelector('input:checked');
+      answered=!!v; ok=answered && +v.value===matching[i][2];
+    } else if(kind==='fill') {
+      const v=el.querySelector('input').value.trim().replace(/[.!?]/g,'');
+      answered=!!v; ok=answered && v===fill[i][1];
+    } else {
+      const v=el.querySelector('input:checked');
+      answered=!!v; ok=answered && v.value===String(tf[i][1]);
+    }
+    const fb=el.querySelector('.feedback');
+    fb.textContent = !answered ? 'לא נענתה עדיין' : ok ? '✓ נכון!' : '✗ כדאי לנסות שוב';
+    fb.className='feedback '+(ok?'correct':'incorrect');
+    if(ok) correct++; if(!answered) unanswered++;
+  });
+  const score=document.getElementById('score');
+  score.style.display='block';
+  score.textContent=`הצלחתם ב־${correct} מתוך ${total} שאלות בחלקים א׳–ג׳.${unanswered ? ` נותרו ${unanswered} שאלות ללא תשובה.` : ''}`;
+  score.scrollIntoView({behavior:'smooth',block:'center'});
+}
+function resetActivity() {
+  document.querySelectorAll('input').forEach(x=>{ if(x.type==='radio') x.checked=false; else x.value=''; });
+  document.querySelectorAll('.feedback').forEach(x=>{x.textContent='';x.className='feedback';});
+  document.getElementById('score').style.display='none';
+}
+render();
+</script>
+</body>
+</html>
